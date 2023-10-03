@@ -1,5 +1,6 @@
 package com.iams.User;
 
+import com.iams.Token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,8 @@ public class User  implements UserDetails {
     private String lastName;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -55,8 +58,9 @@ public class User  implements UserDetails {
         return true;
     }
 
+    // TODO: isEnabled needs to be initialised to false until email is verified
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
