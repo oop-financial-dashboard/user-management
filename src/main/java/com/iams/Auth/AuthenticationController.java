@@ -28,4 +28,14 @@ public class AuthenticationController {
     {
         return ResponseEntity.ok(service.authenticate(request));
     }
+
+    @PostMapping("/validateToken")
+    public ResponseEntity<?> validateToken(
+        @RequestBody TokenValidationRequest request
+    ) {
+        if (service.validateToken(request)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(401).build();
+    }
 }

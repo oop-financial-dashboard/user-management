@@ -60,6 +60,12 @@ public class AuthenticationService {
                 .build();
     }
 
+    public Boolean validateToken(TokenValidationRequest request) {
+        return tokenRepository.findByToken(request.getToken())
+                .map(token -> !token.isExpired() && !token.isRevoked())
+                .orElse(false);
+    }
+
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
         if (validUserTokens.isEmpty()) return;
