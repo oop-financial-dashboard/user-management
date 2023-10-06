@@ -1,13 +1,13 @@
 package com.iams.Auth;
 
 import com.iams.Config.JwtService;
-import com.iams.Token.Token;
-import com.iams.Token.TokenRepository;
-import com.iams.Token.TokenType;
+import com.iams.Email.EmailService;
+import com.iams.Token.*;
 import com.iams.User.Role;
 import com.iams.User.User;
 import com.iams.User.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +21,8 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
+    private final EmailService emailService;
 
     // create user, save details in the database and return the generated token
     public AuthenticationResponse register(RegisterRequest request) {
@@ -34,6 +36,9 @@ public class AuthenticationService {
         var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         saveUserToken(savedUser, jwtToken);
+        var confirmationToken = saveConfirmationToken(user);
+        var email = createMailMessage(request.getEmail(), confirmationToken);
+        emailService.sendEmail(email);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -84,5 +89,23 @@ public class AuthenticationService {
                 .expired(false)
                 .build();
         tokenRepository.save(token);
+    }
+
+    private ConfirmationToken saveConfirmationToken(User user) {
+        var token = ConfirmationToken.builder()
+                .user(user)
+                .build();
+        confirmationTokenRepository.save(token);
+        return token;
+    }
+
+    private SimpleMailMessage createMailMessage(String userEmail, ConfirmationToken confirmationToken) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(userEmail);
+        mailMessage.setSubject("Complete Registration!");
+        mailMessage.setFrom("srikar.primary@gmail.com");
+        mailMessage.setText("To confirm your account, please click here : "
+                +"http://localhost:8080/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken());
+        return mailMessage;
     }
 }
