@@ -32,6 +32,7 @@ public class User  implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+    private Boolean isActivated = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -61,6 +62,6 @@ public class User  implements UserDetails {
     // TODO: isEnabled needs to be initialised to false until email is verified
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActivated;
     }
 }

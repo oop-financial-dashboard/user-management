@@ -32,6 +32,7 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.PROFESSIONAL)
+                .isActivated(false)
                 .build();
         var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -65,6 +66,20 @@ public class AuthenticationService {
                 .build();
     }
 
+    public Boolean confirmAccount(String token) {
+        ConfirmationToken confirmationToken = confirmationTokenRepository.findByConfirmationToken(token);
+
+        if (confirmationToken != null) {
+            // user .orElseThrow to catch situations where there is no user with the email & since user is optional
+            var user = repository.findByEmail(confirmationToken.getUser().getEmail())
+                    .orElseThrow();
+            user.setIsActivated(true);
+            repository.save(user);
+            return user.isEnabled();
+        }
+        return false;
+    }
+
     public Boolean validateToken(TokenValidationRequest request) {
         return tokenRepository.findByToken(request.getToken())
                 .map(token -> !token.isExpired() && !token.isRevoked())
@@ -92,9 +107,7 @@ public class AuthenticationService {
     }
 
     private ConfirmationToken saveConfirmationToken(User user) {
-        var token = ConfirmationToken.builder()
-                .user(user)
-                .build();
+        ConfirmationToken token = new ConfirmationToken(user);
         confirmationTokenRepository.save(token);
         return token;
     }
