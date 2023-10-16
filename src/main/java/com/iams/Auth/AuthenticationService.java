@@ -117,8 +117,10 @@ public class AuthenticationService {
         mailMessage.setTo(userEmail);
         mailMessage.setSubject("Complete Registration!");
         mailMessage.setFrom("srikar.primary@gmail.com");
-        mailMessage.setText("To confirm your account, please click here : "
-                +"http://localhost:8080/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken());
+        mailMessage.setText("Hi " + confirmationToken.getUser().getFirstName() + " " + confirmationToken.getUser().getLastName() + "\\n"
+                +"Welcome to the GS Team! To activate your account, please click the link below. \\n\\n"
+                +"http://localhost:8088/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
+                +"\\n\\n Warm Regards,\\nGS Development Team");
         return mailMessage;
     }
 }
