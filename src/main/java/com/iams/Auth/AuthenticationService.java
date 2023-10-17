@@ -6,12 +6,15 @@ import com.iams.Token.*;
 import com.iams.User.Role;
 import com.iams.User.User;
 import com.iams.User.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,23 +29,27 @@ public class AuthenticationService {
 
     // create user, save details in the database and return the generated token
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.PROFESSIONAL)
-                .isActivated(false)
-                .build();
-        var savedUser = repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        saveUserToken(savedUser, jwtToken);
-        var confirmationToken = saveConfirmationToken(user);
-        var email = createMailMessage(request.getEmail(), confirmationToken);
-        emailService.sendEmail(email);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        if (repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EntityExistsException("This email has already been registered!");
+        } else {
+            var user = User.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.PROFESSIONAL)
+                    .isActivated(false)
+                    .build();
+            var savedUser = repository.save(user);
+            var jwtToken = jwtService.generateToken(user);
+            saveUserToken(savedUser, jwtToken);
+            var confirmationToken = saveConfirmationToken(user);
+            var email = createMailMessage(request.getEmail(), confirmationToken);
+            emailService.sendEmail(email);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        }
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -120,7 +127,7 @@ public class AuthenticationService {
         mailMessage.setText("Hi " + confirmationToken.getUser().getFirstName() + " " + confirmationToken.getUser().getLastName() + "\n"
                 +"Welcome to the GS Team! To activate your account, please click the link below. \n\n"
                 +"http://localhost:8088/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
-                +"\n\n Warm Regards,\nGS Development Team");
+                +"\n\nWarm Regards,\nGS Development Team");
         return mailMessage;
     }
 }
