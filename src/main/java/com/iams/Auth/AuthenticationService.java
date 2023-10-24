@@ -126,7 +126,7 @@ public class AuthenticationService {
         mailMessage.setFrom("srikar.primary@gmail.com");
         mailMessage.setText("Hi " + confirmationToken.getUser().getFirstName() + " " + confirmationToken.getUser().getLastName() + "\n"
                 +"Welcome to the GS Team! To activate your account, please click the link below. \n\n"
-                +"http://localhost:8088/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
+                +"http://localhost:8080/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
                 +"\n\nWarm Regards,\nGS Development Team");
         return mailMessage;
     }
