@@ -24,7 +24,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/user-details")
+    @PostMapping("/user-details")
     public ResponseEntity<GetUserDetailsResponse> getUser(
             @RequestBody GetUserDetailsRequest request
     ) {
