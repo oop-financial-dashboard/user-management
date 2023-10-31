@@ -8,13 +8,11 @@ import com.iams.User.User;
 import com.iams.User.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -126,7 +124,7 @@ public class AuthenticationService {
         mailMessage.setFrom("srikar.primary@gmail.com");
         mailMessage.setText("Hi " + confirmationToken.getUser().getFirstName() + " " + confirmationToken.getUser().getLastName() + "\n"
                 +"Welcome to the GS Team! To activate your account, please click the link below. \n\n"
-                +"http://localhost:8080/api/v1/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
+                +"http://localhost:8080/api/auth/confirm-account?token="+confirmationToken.getConfirmationToken()
                 +"\n\nWarm Regards,\nGS Development Team");
         return mailMessage;
     }
