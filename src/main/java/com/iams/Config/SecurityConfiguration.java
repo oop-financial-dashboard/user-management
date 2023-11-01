@@ -20,7 +20,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
-    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**"};
+    private static final String[] WHITE_LIST_URL = {"/api/auth/**"};
 
     // At the application startup,spring security will try to look for bean security filter chain
     // This bean is responsible for configuring the security of all the HTTP security of the application
@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout()
-                .logoutUrl("/api/v1/auth/logout")
+                .logoutUrl("/api/auth/logout")
                 .addLogoutHandler(logoutHandler)
                 // clears the security context when user successfully logs out
                 .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
